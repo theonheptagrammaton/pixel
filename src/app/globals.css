@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Scroll animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.will-animate { opacity: 0; }
+.animate-fade-up { animation: fadeUp 600ms ease-out forwards; }
+.animate-fade-in { animation: fadeIn 600ms ease-out forwards; }
+
+:root {
+  --background: #ffffff;
+  --foreground: #18181b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Template section responsive layout ─────────────────────── */
+@media (max-width: 1024px) {
+  /* Blog grid → 2 col on tablet */
+  .sf-blog-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 768px) {
+  /* Header: show hamburger, hide desktop nav */
+  .sf-nav-desktop { display: none !important; }
+  .sf-nav-mobile-btn { display: flex !important; }
+
+  /* About 2-col → 1 col */
+  .sf-about-grid { grid-template-columns: 1fr !important; }
+
+  /* Services grid → 1 col */
+  .sf-services-grid { grid-template-columns: 1fr !important; }
+  .sf-services-list-row { grid-template-columns: 64px 1fr !important; }
+
+  /* Gallery grid → 2 col */
+  .sf-gallery-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Team grid → 2 col */
+  .sf-team-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Pricing grid → 1 col, remove scale on popular */
+  .sf-pricing-grid { grid-template-columns: 1fr !important; }
+  .sf-pricing-popular { transform: none !important; }
+
+  /* Testimonials grid → 1 col */
+  .sf-testimonials-grid { grid-template-columns: 1fr !important; }
+
+  /* Footer columns → 1 col */
+  .sf-footer-grid { grid-template-columns: 1fr !important; }
+
+  /* Contact grid → 1 col */
+  .sf-contact-grid { grid-template-columns: 1fr !important; }
+
+  /* Menu grid → 1 col */
+  .sf-menu-grid { grid-template-columns: 1fr !important; }
+
+  /* Stats grid → 2 col */
+  .sf-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Blog grid → 1 col */
+  .sf-blog-grid { grid-template-columns: 1fr !important; }
+
+  /* Blog list row → 1 col */
+  .sf-blog-list-row { grid-template-columns: 1fr !important; }
+
+  /* Reduce section padding on mobile */
+  .sf-section-pad { padding: 56px 16px !important; }
+}
+
+@media (max-width: 480px) {
+  .sf-gallery-grid { grid-template-columns: 1fr !important; }
+  .sf-team-grid { grid-template-columns: 1fr !important; }
+  .sf-stats-grid { grid-template-columns: 1fr !important; }
+  .sf-section-pad { padding: 40px 16px !important; }
+}

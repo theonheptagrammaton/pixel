@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pixel_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pixel
+      POSTGRES_PASSWORD: pixel123
+      POSTGRES_DB: pixel
+    ports:
+      - "5434:5432"
+    volumes:
+      - pixel_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pixel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: node:20-alpine
+    container_name: pixel_app
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "npm install && npx prisma generate && npm run dev"
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      DATABASE_URL: "postgresql://pixel:pixel123@db:5432/pixel"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "super-secret-key-change-in-production"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      NEXT_PUBLIC_ROOT_DOMAIN: "localhost:3000"
+      ADMIN_EMAIL: "admin@example.com"
+      ADMIN_USERNAME: "admin"
+      ADMIN_PASSWORD: "admin12345"
+      NODE_ENV: development
+
+volumes:
+  pixel_pgdata:

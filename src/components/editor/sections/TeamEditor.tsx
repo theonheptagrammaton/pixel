@@ -1,0 +1,62 @@
+"use client";
+
+import { TeamData, TeamMember, SiteGlobalConfig } from "@/types/template";
+import { FieldGroup, Field, TextInput, SelectInput } from "../SectionEditorWrapper";
+import { ImageUpload } from "@/components/ui/ImageUpload";
+
+interface Props {
+  data: TeamData;
+  onChange: (data: TeamData) => void;
+  globalConfig: SiteGlobalConfig;
+}
+
+const emptyMember = (): TeamMember => ({ name: "Yeni Uye", role: "Unvan", image: "", bio: "" });
+
+export function TeamEditor({ data, onChange }: Props) {
+  const u = (patch: Partial<TeamData>) => onChange({ ...data, ...patch });
+  const updateMember = (i: number, patch: Partial<TeamMember>) => {
+    u({ members: data.members.map((m, idx) => (idx === i ? { ...m, ...patch } : m)) });
+  };
+
+  return (
+    <div className="space-y-6">
+      <FieldGroup label="Icerik">
+        <Field label="Baslik"><TextInput value={data.title} onChange={(v) => u({ title: v })} /></Field>
+        <Field label="Alt Baslik"><TextInput value={data.subtitle} onChange={(v) => u({ subtitle: v })} /></Field>
+      </FieldGroup>
+
+      <FieldGroup label="Duzen">
+        <Field label="Gorunum">
+          <SelectInput value={data.layout} onChange={(v) => u({ layout: v as TeamData["layout"] })}
+            options={[{ value: "grid", label: "Izgara" }, { value: "list", label: "Liste" }]} />
+        </Field>
+      </FieldGroup>
+
+      <FieldGroup label={`Ekip Uyeleri (${data.members.length})`}>
+        <div className="space-y-3">
+          {data.members.map((member, i) => (
+            <div key={i} className="border border-zinc-200 rounded-md p-3 bg-zinc-50 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-zinc-500">Uye {i + 1}</span>
+                <button onClick={() => u({ members: data.members.filter((_, idx) => idx !== i) })} className="text-zinc-400 hover:text-red-500 transition-colors">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <Field label="Ad Soyad"><TextInput value={member.name} onChange={(v) => updateMember(i, { name: v })} /></Field>
+              <Field label="Unvan / Rol"><TextInput value={member.role} onChange={(v) => updateMember(i, { role: v })} /></Field>
+              <Field label="Biyografi"><TextInput value={member.bio} onChange={(v) => updateMember(i, { bio: v })} multiline rows={2} /></Field>
+              <ImageUpload label="Fotograf" value={member.image} onChange={(v) => updateMember(i, { image: v })} hint="Kare gorsel onerilir (400x400px)" />
+              <Field label="LinkedIn">
+                <TextInput value={member.socialLinks?.linkedin ?? ""} onChange={(v) => updateMember(i, { socialLinks: { ...member.socialLinks, linkedin: v } })} placeholder="https://linkedin.com/in/..." />
+              </Field>
+            </div>
+          ))}
+        </div>
+        <button onClick={() => u({ members: [...data.members, emptyMember()] })}
+          className="w-full py-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-900 border border-dashed border-zinc-300 rounded hover:border-zinc-400 transition-colors">
+          + Uye Ekle
+        </button>
+      </FieldGroup>
+    </div>
+  );
+}

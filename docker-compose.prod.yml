@@ -1,0 +1,57 @@
+networks:
+  coolify:
+    external: true
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pixel_db_prod
+    restart: unless-stopped
+    networks:
+      - coolify
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pixel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: ${POSTGRES_DB:-pixel}
+    volumes:
+      - pixel_pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pixel}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pixel_app_prod
+    restart: unless-stopped
+    networks:
+      - coolify
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pixel_uploads:/app/public/uploads
+      - /data/coolify/proxy/dynamic:/traefik-dynamic
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-pixel}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-pixel}"
+      NEXTAUTH_URL: "${NEXTAUTH_URL:?required}"
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET:?required}"
+      NEXT_PUBLIC_APP_URL: "${NEXT_PUBLIC_APP_URL}"
+      NEXT_PUBLIC_ROOT_DOMAIN: "${NEXT_PUBLIC_ROOT_DOMAIN}"
+      NEXT_PUBLIC_CONTACT_EMAIL: "${NEXT_PUBLIC_CONTACT_EMAIL:-}"
+      NEXT_PUBLIC_SERVER_IP: "${NEXT_PUBLIC_SERVER_IP:-}"
+      ADMIN_EMAIL: "${ADMIN_EMAIL:-}"
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
+      USER_EMAIL_DOMAIN: "${USER_EMAIL_DOMAIN:-pixel.local}"
+      TRAEFIK_DYNAMIC_DIR: "/traefik-dynamic"
+      TRAEFIK_SERVICE_URL: "http://pixel_app_prod:3000"
+      TRAEFIK_CERT_RESOLVER: "${TRAEFIK_CERT_RESOLVER:-letsencrypt}"
+
+volumes:
+  pixel_pgdata_prod:
+  pixel_uploads:
